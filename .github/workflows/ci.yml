@@ -1,0 +1,116 @@
+name: Python CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+
+    - name: Test with tox
+      run: tox
+        
+    
+#     - name: Lint with flake8
+#       run: |
+#         pip install flake8
+#         # Stop the build if there are Python syntax errors or undefined names
+#         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+#         # Exit-zero treats all errors as warnings
+#         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+#     - name: Type check with mypy
+#       run: |
+#         pip install mypy
+#         mypy .
+#       continue-on-error: true
+    
+#     - name: Run tests with pytest
+#       run: |
+#         pip install pytest pytest-cov
+#         pytest tests/ --cov=. --cov-report=xml --cov-report=html
+    
+#     - name: Upload coverage to Codecov
+#       uses: codecov/codecov-action@v4
+#       with:
+#         file: ./coverage.xml
+#         fail_ci_if_error: false
+
+#   code-quality:
+#     runs-on: ubuntu-latest
+    
+#     steps:
+#     - uses: actions/checkout@v4
+    
+#     - name: Set up Python
+#       uses: actions/setup-python@v5
+#       with:
+#         python-version: '3.11'
+#         cache: 'pip'
+    
+#     - name: Install dependencies
+#       run: |
+#         python -m pip install --upgrade pip
+#         pip install black isort ruff
+    
+#     - name: Check code formatting with black
+#       run: black --check .
+    
+#     - name: Check import sorting with isort
+#       run: isort --check-only .
+    
+#     - name: Lint with ruff
+#       run: ruff check .
+
+#   security:
+#     runs-on: ubuntu-latest
+    
+#     steps:
+#     - uses: actions/checkout@v4
+    
+#     - name: Set up Python
+#       uses: actions/setup-python@v5
+#       with:
+#         python-version: '3.11'
+    
+#     - name: Install dependencies
+#       run: |
+#         python -m pip install --upgrade pip
+#         pip install safety bandit
+    
+#     - name: Check for security vulnerabilities
+#       run: |
+#         safety check
+#         bandit -r . -f json -o bandit-report.json
+#       continue-on-error: true
+    
+#     - name: Upload security report
+#       uses: actions/upload-artifact@v4
+#       with:
+#         name: security-report
+#         path: bandit-report.json
